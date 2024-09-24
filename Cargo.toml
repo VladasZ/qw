@@ -7,3 +7,4 @@ members = ["qw"]
 default-members = ["qw"]
 
 [workspace.dependencies]
+structopt = "0.3"
