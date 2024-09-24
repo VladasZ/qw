@@ -1,0 +1,9 @@
+[workspace]
+
+resolver = "2"
+
+members = ["qw"]
+
+default-members = ["qw"]
+
+[workspace.dependencies]

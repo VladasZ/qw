@@ -1,0 +1,11 @@
+[package]
+name = "qw"
+version = "0.1.1"
+edition = "2021"
+authors = ["Vladas Zakrevksis <146100@gmail.com>"]
+description = "QW"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/VladasZ/qw"
+repository = "https://github.com/VladasZ/qw"
+
+[dependencies]
