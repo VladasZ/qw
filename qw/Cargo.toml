@@ -1,12 +1,18 @@
 [package]
-name = "qw"
-version = "0.1.1"
-edition = "2021"
 authors = ["Vladas Zakrevksis <146100@gmail.com>"]
 description = "QW"
-license = "MIT OR Apache-2.0"
+edition.workspace = true
+version.workspace = true
 homepage = "https://github.com/VladasZ/qw"
+license = "MIT OR Apache-2.0"
+name = "qw"
 repository = "https://github.com/VladasZ/qw"
 
 [dependencies]
+serde = { workspace = true }
 structopt = { workspace = true }
+toml = { workspace = true }
+anyhow = { workspace = true }
+
+sercli = { workspace = true }
+comfy-table = { workspace = true }
