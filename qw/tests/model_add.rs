@@ -1,4 +1,4 @@
-use qw::{FieldDef, generate_migration_sql, write_migration};
+use qw::{FieldDef, generate_add_column_sql, generate_migration_sql, write_migration};
 use sercli::Migrations;
 
 #[test]
@@ -63,6 +63,37 @@ fn generates_sql_without_default_pk() {
 }
 
 #[test]
+fn generates_add_column_sql() {
+    let sql = generate_add_column_sql(
+        "posts",
+        &FieldDef {
+            name:     "body".into(),
+            sql_type: "varchar".into(),
+            not_null: true,
+        },
+    );
+    assert_eq!(
+        sql,
+        r#"ALTER TABLE "posts" ADD COLUMN "body" varchar NOT NULL;
+"#
+    );
+
+    let sql = generate_add_column_sql(
+        "posts",
+        &FieldDef {
+            name:     "views".into(),
+            sql_type: "integer".into(),
+            not_null: false,
+        },
+    );
+    assert_eq!(
+        sql,
+        r#"ALTER TABLE "posts" ADD COLUMN "views" integer;
+"#
+    );
+}
+
+#[test]
 fn written_migration_is_parseable() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().to_str().unwrap();
@@ -77,7 +108,7 @@ fn written_migration_is_parseable() {
         }],
     );
 
-    write_migration(path, "Article", &sql).unwrap();
+    write_migration(path, "add_articles", &sql).unwrap();
 
     let migrations = Migrations::get(path).unwrap();
     let entity = migrations.entities.get("Article").expect("Article not found");
