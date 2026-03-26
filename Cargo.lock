@@ -2469,7 +2469,7 @@ dependencies = [
 
 [[package]]
 name = "qw"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "Inflector",
  "anyhow",
@@ -3086,7 +3086,9 @@ checksum = "d767eb0aabc880b29956c35734170f26ed551a859dbd361d140cdbeca61ab1e2"
 
 [[package]]
 name = "sercli"
-version = "0.3.0"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae08a92339608bda79c2dbb57109211b3f941f42f93348b095a96723a6e076ea"
 dependencies = [
  "Inflector",
  "anyhow",
