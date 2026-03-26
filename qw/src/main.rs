@@ -1,5 +1,7 @@
 use anyhow::Result;
 use comfy_table::{Table, presets::UTF8_FULL};
+use dialoguer::{Confirm, Input, Select};
+use qw::{FieldDef, generate_migration_sql, write_migration};
 use sercli::Migrations;
 use serde::Deserialize;
 use structopt::StructOpt;
@@ -13,6 +15,7 @@ enum Args {
 #[derive(StructOpt, Debug)]
 enum ModelArgs {
     Show,
+    Add,
 }
 
 #[derive(Deserialize)]
@@ -30,6 +33,56 @@ fn find_config() -> Config {
         }
         assert!(dir.pop(), "qw.toml not found");
     }
+}
+
+const SQL_TYPES: &[&str] = &[
+    "bigint",
+    "integer",
+    "smallint",
+    "varchar",
+    "boolean",
+    "decimal",
+    "timestamp",
+    "real",
+];
+
+fn add_model(migrations_path: &str) -> Result<()> {
+    let model_name: String = Input::new().with_prompt("Model name").interact_text()?;
+
+    let default_pk = Confirm::new()
+        .with_prompt("Add default PK: id bigint NOT NULL PRIMARY KEY")
+        .default(true)
+        .interact()?;
+
+    let mut fields = vec![];
+
+    loop {
+        let name: String = Input::new()
+            .with_prompt("Field name (empty to finish)")
+            .allow_empty(true)
+            .interact_text()?;
+
+        if name.is_empty() {
+            break;
+        }
+
+        let type_idx = Select::new().with_prompt("Type").items(SQL_TYPES).default(0).interact()?;
+        let not_null = Confirm::new().with_prompt("NOT NULL").default(true).interact()?;
+
+        fields.push(FieldDef {
+            name,
+            sql_type: SQL_TYPES[type_idx].to_string(),
+            not_null,
+        });
+    }
+
+    let sql = generate_migration_sql(&model_name, default_pk, &fields);
+    let filename = write_migration(migrations_path, &model_name, &sql)?;
+
+    println!("Created {filename}");
+    println!("{sql}");
+
+    Ok(())
 }
 
 fn main() -> Result<()> {
@@ -69,6 +122,9 @@ fn main() -> Result<()> {
             }
 
             println!("{table}");
+        }
+        Args::Model(ModelArgs::Add) => {
+            add_model(&config.migrations)?;
         }
     }
 

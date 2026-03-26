@@ -10,5 +10,6 @@ cargo clippy \
     -W clippy::pedantic \
     \
     -A clippy::must-use-candidate \
+    -A clippy::missing_errors_doc \
     \
     -D warnings
