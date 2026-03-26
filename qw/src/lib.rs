@@ -5,6 +5,7 @@ pub struct FieldDef {
     pub name:     String,
     pub sql_type: String,
     pub not_null: bool,
+    pub default:  Option<String>,
 }
 
 pub fn generate_migration_sql(model_name: &str, default_pk: bool, fields: &[FieldDef]) -> String {
@@ -16,8 +17,12 @@ pub fn generate_migration_sql(model_name: &str, default_pk: bool, fields: &[Fiel
     }
 
     for f in fields {
+        let default = f.default.as_deref().map(|d| format!(" DEFAULT {d}")).unwrap_or_default();
         let constraint = if f.not_null { " NOT NULL" } else { "" };
-        columns.push(format!(r#"    "{}" {}{}"#, f.name, f.sql_type, constraint));
+        columns.push(format!(
+            r#"    "{}" {}{}{}"#,
+            f.name, f.sql_type, default, constraint
+        ));
     }
 
     format!(
@@ -33,12 +38,32 @@ pub fn generate_migration_sql(model_name: &str, default_pk: bool, fields: &[Fiel
     )
 }
 
-pub fn generate_add_column_sql(table_name: &str, field: &FieldDef) -> String {
-    let constraint = if field.not_null { " NOT NULL" } else { "" };
+pub fn quote_default(sql_type: &str, value: &str) -> String {
+    if matches!(sql_type, "varchar" | "timestamp") {
+        format!("'{value}'")
+    } else {
+        value.to_string()
+    }
+}
+
+pub fn generate_add_column_sql(table_name: &str, fields: &[FieldDef]) -> String {
+    let columns = fields
+        .iter()
+        .map(|f| {
+            let default = f.default.as_deref().map(|d| format!(" DEFAULT {d}")).unwrap_or_default();
+            let constraint = if f.not_null { " NOT NULL" } else { "" };
+            format!(
+                r#"    ADD COLUMN "{}" {}{}{}"#,
+                f.name, f.sql_type, default, constraint
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(",\n");
+
     format!(
-        r#"ALTER TABLE "{table_name}" ADD COLUMN "{}" {}{};
-"#,
-        field.name, field.sql_type, constraint
+        r#"ALTER TABLE "{table_name}"
+{columns};
+"#
     )
 }
 

@@ -8,6 +8,10 @@ license = "MIT OR Apache-2.0"
 name = "qw"
 repository = "https://github.com/VladasZ/qw"
 
+[[bin]]
+name = "qw"
+path = "src/main.rs"
+
 [dependencies]
 serde = { workspace = true }
 structopt = { workspace = true }
@@ -20,3 +24,6 @@ dialoguer = { workspace = true }
 chrono = { workspace = true }
 Inflector = { workspace = true }
 tempfile = { workspace = true }
+sqlx = { workspace = true }
+tokio = { workspace = true }
+testcontainers-modules = { workspace = true }
