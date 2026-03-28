@@ -5,7 +5,7 @@ CREATE TYPE "chat_kind" AS ENUM (
 
 CREATE TABLE "chats"
 (
-    "telegram_id" bigint UNIQUE PRIMARY KEY NOT NULL,
+    "telegram_id" bigserial UNIQUE PRIMARY KEY NOT NULL,
     "name"        varchar                   NOT NULL,
     "kind"        chat_kind                 NOT NULL
 );

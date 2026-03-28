@@ -3,7 +3,10 @@ use comfy_table::{Table, presets::UTF8_FULL};
 use dialoguer::{Confirm, Input, Select};
 use inflector::Inflector;
 use qw::{FieldDef, generate_add_column_sql, generate_migration_sql, quote_default, write_migration};
-use sercli::Migrations;
+use sercli::{
+    Migrations,
+    db::{generate_model, prepare_db},
+};
 use serde::Deserialize;
 use structopt::StructOpt;
 
@@ -18,6 +21,7 @@ enum ModelArgs {
     Show,
     Add,
     Edit,
+    Gen,
 }
 
 #[derive(Deserialize)]
@@ -98,7 +102,8 @@ fn add_model(migrations_path: &str) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let args = Args::from_args();
 
     let config = find_config();
@@ -138,6 +143,10 @@ fn main() -> Result<()> {
         }
         Args::Model(ModelArgs::Add) => {
             add_model(&config.migrations)?;
+        }
+        Args::Model(ModelArgs::Gen) => {
+            prepare_db(&config.migrations).await?;
+            generate_model(&config.migrations)?;
         }
         Args::Model(ModelArgs::Edit) => {
             let migrations = Migrations::get(&config.migrations)?;

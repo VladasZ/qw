@@ -1,7 +1,17 @@
+use std::{
+    collections::BTreeSet,
+    fs::{read_dir, remove_dir_all},
+    path::Path,
+    process::Command,
+};
+
+use inflector::cases::snakecase::to_snake_case;
 use qw::{FieldDef, generate_add_column_sql, generate_migration_sql};
 use sercli::Migrations;
 use sqlx::PgPool;
 use testcontainers_modules::{postgres::Postgres, testcontainers::runners::AsyncRunner};
+
+const ENTITIES_DIR: &str = "../test_data/src/entities";
 
 async fn connect() -> (PgPool, impl Drop) {
     let container = Postgres::default().start().await.unwrap();
@@ -113,4 +123,46 @@ async fn alter_table_migration_runs() {
     assert_eq!(columns, vec!["id", "name", "greben"]);
 
     tx.rollback().await.unwrap();
+}
+
+#[tokio::test]
+async fn model_gen_recreates_entities() {
+    let entities_dir = Path::new(ENTITIES_DIR);
+
+    if entities_dir.exists() {
+        remove_dir_all(entities_dir).unwrap();
+    }
+    assert!(!entities_dir.exists());
+
+    let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+
+    let status = Command::new(env!("CARGO_BIN_EXE_qw"))
+        .args(["model", "gen"])
+        .current_dir(repo_root)
+        .status()
+        .unwrap();
+
+    assert!(status.success());
+
+    let migrations = Migrations::get("../test_data/migrations").unwrap();
+
+    let mut expected: BTreeSet<String> = migrations
+        .entities
+        .keys()
+        .map(|name| format!("{}.rs", to_snake_case(name)))
+        .collect();
+
+    for name in migrations.enums.keys() {
+        expected.insert(format!("{}.rs", to_snake_case(name)));
+    }
+
+    expected.insert("mod.rs".to_string());
+    expected.insert("model.rs".to_string());
+
+    let actual: BTreeSet<String> = read_dir(entities_dir)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().to_string())
+        .collect();
+
+    assert_eq!(expected, actual);
 }
