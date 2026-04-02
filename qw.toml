@@ -1,1 +1,2 @@
 migrations = "test_data/migrations"
+compose = "docker-compose.yml"

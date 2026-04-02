@@ -1,4 +1,5 @@
 
+#![allow(dead_code)]
 #[allow(unused_imports)]
 #[allow(clippy::wildcard_imports)]
 use sercli::*;
@@ -18,8 +19,8 @@ mod reflected {
     sqlx::FromRow,
 )]
 pub struct Rooster {
-    pub id: crate::Bigserial,
-    pub chat_id: i64,
+    pub id: ID,
+    pub chat_id: ID,
     pub name: String,
     pub sopog: String,
     pub strength: i64,

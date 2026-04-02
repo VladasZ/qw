@@ -145,8 +145,8 @@ async fn main() -> Result<()> {
             add_model(&config.migrations)?;
         }
         Args::Model(ModelArgs::Gen) => {
-            prepare_db(&config.migrations).await?;
-            generate_model(&config.migrations)?;
+            prepare_db().await?;
+            generate_model()?;
         }
         Args::Model(ModelArgs::Edit) => {
             let migrations = Migrations::get(&config.migrations)?;

@@ -1,4 +1,5 @@
 
+#![allow(dead_code)]
 #[allow(unused_imports)]
 #[allow(clippy::wildcard_imports)]
 use sercli::*;
@@ -18,8 +19,8 @@ mod reflected {
     sqlx::FromRow,
 )]
 pub struct UserStat {
-    pub user_id: i64,
-    pub chat_id: i64,
+    pub user_id: ID,
+    pub chat_id: ID,
     pub messages: i32,
     pub kto: i32,
     pub llm: i32,
